@@ -1042,8 +1042,9 @@ check_clarity (void)
 
   /* Halos: a step of 50 L* (25 to 75) is an edge, far above the
    * filter's detail threshold (12 L*). Bound: the overshoot at +100 stays
-   * under 1 L*, about one just noticeable difference of lightness, so no
-   * halo can be seen; an unsharp mask of the same scale and gain at the
+   * under 1 L*, well under a just noticeable difference of colour (2.3 in
+   * CIELAB on average, Mahy et al. 1994), so no halo can be seen; an
+   * unsharp mask of the same scale and gain at the
    * band's peak overshoots by tens of L*. Smaller steps are detail and
    * are raised (noted). */
   {

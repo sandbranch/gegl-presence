@@ -43,8 +43,8 @@ property_double (amount, _("Amount"), 0.0)
 
 property_double (size, _("Size"), 40.0)
   description (_("The size (radius) in pixels of the detail that is "
-                 "changed most. Detail from about a quarter of it to about "
-                 "four times it is changed too, less."))
+                 "changed most. Detail from about half of it to about three "
+                 "times it is changed strongly, smaller and larger less."))
   value_range (4.0, 1000.0)
   ui_range (4.0, 400.0)
   ui_gamma (2.0)

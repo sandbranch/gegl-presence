@@ -1,0 +1,102 @@
+[
+ {
+  "file": "hazy-blue-slopes.jpg",
+  "kind": "haze",
+  "title": "File:Blue haze over wooded slopes (Unsplash).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Blue_haze_over_wooded_slopes_(Unsplash).jpg",
+  "license": "CC0",
+  "author": "Greg Rakozy grakozy",
+  "credit": "https://unsplash.com/photos/fb70I7JHQe8 Image at the Wayback Machine Gallery at the Wayback Machine",
+  "size": "4608x3456",
+  "description": "Willow Creek, United States"
+ },
+ {
+  "file": "hazy-mountains-fire.jpg",
+  "kind": "haze",
+  "title": "File:Haze in Mountains.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Haze_in_Mountains.jpg",
+  "license": "Public domain",
+  "author": "Doggo19292",
+  "credit": "Own work",
+  "size": "4160x3120",
+  "description": "Haze in some mountains, during grassland fires in Monterrey, Mexico."
+ },
+ {
+  "file": "hazy-kathmandu.jpg",
+  "kind": "haze",
+  "title": "File:Kathmandu Valley panoramic view from Shivapuri hills under haze.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Kathmandu_Valley_panoramic_view_from_Shivapuri_hills_under_haze.jpg",
+  "license": "CC0",
+  "author": "Krishna k. sahh",
+  "credit": "Own work",
+  "size": "5536x4160",
+  "description": "A panoramic, high-angle view overlooking the dense urban sprawl of the Kathmandu Valley from the elevated slopes of Shivapuri Nagarjun National Park, Nepal. The valley landscape is heavily blanketed b"
+ },
+ {
+  "file": "hazy-summer-valley.jpg",
+  "kind": "haze",
+  "title": "File:Summer haze over a mountain valley (Unsplash).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Summer_haze_over_a_mountain_valley_(Unsplash).jpg",
+  "license": "CC0",
+  "author": "Rosan Harmens rooszan",
+  "credit": "https://unsplash.com/photos/ZiSOuwe2Plw Image at the Wayback Machine Gallery at the Wayback Machine",
+  "size": "2823x4250",
+  "description": "Rosan Harmens 2015-05-18"
+ },
+ {
+  "file": "hazy-turquoise.jpg",
+  "kind": "haze",
+  "title": "File:Turquoise haze over mountains (Unsplash).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Turquoise_haze_over_mountains_(Unsplash).jpg",
+  "license": "CC0",
+  "author": "Ju On juon",
+  "credit": "https://unsplash.com/photos/bkquuNd2QRI archive copy at the Wayback Machine Image at the Wayback Machine",
+  "size": "2500x1875",
+  "description": "Ju On 2016-05-13"
+ },
+ {
+  "file": "alps-grenoble.jpg",
+  "kind": "landscape",
+  "title": "File:View in an easterly direction towards the Western Alps at the location of Grenoble.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:View_in_an_easterly_direction_towards_the_Western_Alps_at_the_location_of_Grenoble.jpg",
+  "license": "CC0",
+  "author": "Dktue",
+  "credit": "Own work",
+  "size": "6240x4160",
+  "description": "View in an easterly direction towards the Western Alps at the location of Grenoble at 7500 feet above sea level.",
+  "full_size": true
+ },
+ {
+  "file": "face-portrait.jpg",
+  "kind": "portrait",
+  "title": "File:Face portrait (Unsplash).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Face_portrait_(Unsplash).jpg",
+  "license": "CC0",
+  "author": "William Stitt willpower",
+  "credit": "https://unsplash.com/photos/PgSu429ID5o archive copy at the Wayback Machine",
+  "size": "5184x3456",
+  "description": "Bethune-Cookman University, Daytona Beach, United States"
+ },
+ {
+  "file": "freckles.jpg",
+  "kind": "portrait",
+  "title": "File:Curly hair and freckles man (Unsplash).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Curly_hair_and_freckles_man_(Unsplash).jpg",
+  "license": "CC0",
+  "author": "Jeremy Bishop tidesinourveins",
+  "credit": "https://unsplash.com/photos/ctAsm_deVVk Image at the Wayback Machine Gallery at the Wayback Machine",
+  "size": "3456x5184",
+  "description": "Jeremy Bishop 2016-09-22"
+ },
+ {
+  "file": "bark-oak.jpg",
+  "kind": "texture",
+  "title": "File:Oak tree bark texture.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Oak_tree_bark_texture.jpg",
+  "license": "CC0",
+  "author": "Kurt Kaiser",
+  "credit": "Own work",
+  "size": "3456x4608",
+  "description": "oak tree bark texture close"
+ }
+]

@@ -387,7 +387,7 @@ typedef struct
   gint   levels;                      /* Laplacian levels, 1 to PRESENCE_MAX_LEVELS */
   gfloat band[PRESENCE_MAX_LEVELS];   /* weight of each level */
   gfloat sigma;                       /* size of detail in L; larger steps are edges */
-  gfloat noise;                       /* differences below it are kept as they are, or 0 */
+  gfloat noise;                       /* changes below it are cored away (smooth areas), or 0 */
   gfloat mid_width;                   /* the samples weighted towards L = 0.5, or 0 */
   gint   src_level;                   /* remap from this Gaussian level (0: the image) */
 } PresenceLLF;
@@ -424,21 +424,18 @@ presence_llf_band (PresenceLLF *p,
         }
     }
   p->levels    = last >= 0 ? last + 1 : 0;
-  /* coarse bands from a copy one level finer than the band: the
-   * approximation of Aubry et al. (2014, sec. 4) */
-  p->src_level = first > 1 ? first - 1 : 0;
+  /* coarse bands from a copy two levels finer than the band (the
+   * approximation of Aubry et al. 2014, sec. 4): as the full image to
+   * within 0.01 L* at a step edge (tests/check.c); one level finer adds
+   * a third to the overshoot there */
+  p->src_level = MAX (first - 2, 0);
 }
 
 static inline gfloat
 presence_detail (gfloat d,
-                 gfloat inv2s2,
-                 gfloat inv2n2)
+                 gfloat inv2s2)
 {
-  gfloat v = d * expf (-d * d * inv2s2);
-
-  if (inv2n2 > 0.0f)
-    v *= 1.0f - expf (-d * d * inv2n2);
-  return v;
+  return d * expf (-d * d * inv2s2);
 }
 
 typedef struct
@@ -446,7 +443,7 @@ typedef struct
   const gfloat *src;
   gfloat       *dst;
   gint          w;
-  gfloat        gamma, inv2s2, inv2n2;
+  gfloat        gamma, inv2s2;
 } PresenceRemap;
 
 static G_GNUC_UNUSED void
@@ -456,7 +453,7 @@ presence_remap_rows (gint y0, gint y1, gpointer data)
   gsize          i, i0 = (gsize) y0 * r->w, i1 = (gsize) y1 * r->w;
 
   for (i = i0; i < i1; i++)
-    r->dst[i] = presence_detail (r->src[i] - r->gamma, r->inv2s2, r->inv2n2);
+    r->dst[i] = presence_detail (r->src[i] - r->gamma, r->inv2s2);
 }
 
 typedef struct
@@ -576,9 +573,7 @@ presence_llf_delta (const PresenceLLF *p,
         {
           gfloat        gamma = lo + k * step;
           gfloat        mw    = 1.0f;
-          PresenceRemap rm    = { src, R[s0], lw[s0], gamma,
-                                  0.5f / (p->sigma * p->sigma),
-                                  p->noise > 0.0f ? 0.5f / (p->noise * p->noise) : 0.0f };
+          PresenceRemap rm    = { src, R[s0], lw[s0], gamma, 0.5f / (p->sigma * p->sigma) };
 
           if (p->mid_width > 0.0f)
             {
@@ -657,6 +652,63 @@ presence_llf_delta (const PresenceLLF *p,
   g_free (lap);
   g_free (tmp);
   return ok;
+}
+
+typedef struct
+{
+  gfloat       *delta;
+  const gfloat *energy;
+  gfloat        n2;
+  gint          w;
+} PresenceCore;
+
+static void
+presence_core_rows (gint y0, gint y1, gpointer data)
+{
+  PresenceCore *c = data;
+  gsize         i, i0 = (gsize) y0 * c->w, i1 = (gsize) y1 * c->w;
+
+  for (i = i0; i < i1; i++)
+    {
+      gfloat e = MAX (c->energy[i], 0.0f);
+      c->delta[i] *= e / (e + c->n2);
+    }
+}
+
+/* Coring of the change: where its local RMS (over about 8 pixels) is
+ * well below noise, as in smooth areas with only noise in them, it is
+ * scaled down by e / (e + noise^2); where there is texture it stays.
+ * work holds w x h floats. Returns FALSE without the memory. */
+static G_GNUC_UNUSED gboolean
+presence_core (gfloat *delta,
+               gint    w,
+               gint    h,
+               gfloat  noise,
+               gfloat *work)
+{
+  gint    w1 = presence_half (w), h1 = presence_half (h);
+  gint    w2 = presence_half (w1), h2 = presence_half (h1);
+  gsize   i, n = (gsize) w * h;
+  gfloat *l1 = g_try_new (gfloat, (gsize) w1 * h1);
+  gfloat *l2 = g_try_new (gfloat, (gsize) w2 * h2);
+  gfloat *tmp = g_try_new (gfloat, MAX ((gsize) w1 * h, (gsize) w * h1));
+  PresenceCore c;
+
+  if (! l1 || ! l2 || ! tmp)
+    {
+      g_free (l1); g_free (l2); g_free (tmp);
+      return FALSE;
+    }
+  for (i = 0; i < n; i++)
+    work[i] = delta[i] * delta[i];
+  presence_reduce (work, w, h, l1, tmp);
+  presence_reduce (l1, w1, h1, l2, tmp);
+  presence_expand (l2, w1, h1, l1, NULL, NULL, tmp);
+  presence_expand (l1, w, h, work, NULL, NULL, tmp);
+  c.delta = delta; c.energy = work; c.n2 = noise * noise; c.w = w;
+  presence_parallel_rows (h, w, presence_core_rows, &c);
+  g_free (l1); g_free (l2); g_free (tmp);
+  return TRUE;
 }
 
 /* guided filter ------------------------------------------------------------ */
@@ -949,7 +1001,9 @@ presence_detail_process (GeglOperation       *operation,
   if (L && Y && delta)
     {
       presence_lightness (&s, buf, whole->width, whole->height, L, Y);
-      if (presence_llf_delta (&llf, L, whole->width, whole->height, delta))
+      if (presence_llf_delta (&llf, L, whole->width, whole->height, delta) &&
+          (llf.noise <= 0.0f ||
+           presence_core (delta, whole->width, whole->height, llf.noise, L)))
         {
           PresenceApply ap = { &s, buf, L, Y, delta, gain, whole->width, range };
 

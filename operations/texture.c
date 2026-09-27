@@ -42,7 +42,7 @@ property_double (amount, _("Amount"), 0.0)
   value_range (-100.0, 100.0)
   ui_digits (0)
 
-property_double (size, _("Size"), 6.0)
+property_double (size, _("Size"), 8.0)
   description (_("The size (radius) in pixels of the detail that is "
                  "changed most. Detail from about a quarter of it to about "
                  "four times it is changed too, less."))
@@ -69,11 +69,11 @@ property_enum (output_range, _("Output range"),
 #include "presence-common.h"
 
 /* the filter's settings: detail below 0.06 in L (6 L*) is changed,
- * larger steps are edges and are left; when accentuating, differences
- * below 0.006 (0.6 L*, noise and smooth areas) are left too; all tones
- * alike; the band is narrower than Clarity's */
+ * larger steps are edges and are left; when accentuating, a change
+ * whose local RMS is below 0.004 in L (0.4 L*: noise in smooth areas)
+ * is cored away; all tones alike; the band is narrower than Clarity's */
 #define TEXTURE_SIGMA     0.06f
-#define TEXTURE_NOISE     0.006f
+#define TEXTURE_NOISE     0.004f
 #define TEXTURE_OCTAVES   0.8
 /* the gain at +100: the detail of the band about tripled; -100 flattens it */
 #define TEXTURE_MAX_GAIN  2.0f

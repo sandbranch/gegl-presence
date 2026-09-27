@@ -1,0 +1,9 @@
+build/
+build-*/
+# the test photos stay out of git (tests/images/fetch.py downloads them)
+tests/images/*
+!tests/images/README.md
+!tests/images/manifest.json
+!tests/images/fetch.py
+tests/output/
+__pycache__/

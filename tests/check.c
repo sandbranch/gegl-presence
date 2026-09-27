@@ -139,6 +139,9 @@ pix_L (const gfloat *p)
 
 /* running an operation ----------------------------------------------------- */
 
+/* the origin of the input buffer (a layer that is not at 0, 0) */
+static gint origin_x = 0, origin_y = 0;
+
 static GeglBuffer *
 new_buffer (gint        w,
             gint        h,
@@ -147,9 +150,10 @@ new_buffer (gint        w,
             gint        tile_h)
 {
   if (tile_w > 0)
-    return g_object_new (GEGL_TYPE_BUFFER, "x", 0, "y", 0, "width", w, "height", h,
-                         "format", fmt, "tile-width", tile_w, "tile-height", tile_h, NULL);
-  return gegl_buffer_new (GEGL_RECTANGLE (0, 0, w, h), fmt);
+    return g_object_new (GEGL_TYPE_BUFFER, "x", origin_x, "y", origin_y, "width", w,
+                         "height", h, "format", fmt, "tile-width", tile_w,
+                         "tile-height", tile_h, NULL);
+  return gegl_buffer_new (GEGL_RECTANGLE (origin_x, origin_y, w, h), fmt);
 }
 
 static void
@@ -184,6 +188,9 @@ run_full (const gchar         *op,
   GeglBuffer   *buf = new_buffer (w, h, in_fmt, tile_w, tile_h);
   GeglNode     *graph, *src, *node;
   GeglRectangle r = roi ? *roi : *GEGL_RECTANGLE (0, 0, w, h);
+
+  r.x += origin_x;
+  r.y += origin_y;
   gpointer      out;
 
   gegl_buffer_set (buf, NULL, 0, in_fmt, in, GEGL_AUTO_ROWSTRIDE);
@@ -642,6 +649,17 @@ check_invariance (void)
           g_free (out);
         }
       g_object_set (gegl_config (), "threads", threads, NULL);
+      /* a buffer that does not start at 0, 0 (a layer with offsets) */
+      {
+        gdouble d;
+        origin_x = 37;
+        origin_y = -21;
+        out = run_full (op, pr, babl_format (LIN), in, w, h, babl_format (LIN), NULL, 64, 64);
+        origin_x = origin_y = 0;
+        d = max_diff (ref, out, n);
+        dt = MAX (dt, d);
+        g_free (out);
+      }
       /* regions asked for on their own, each in a new graph: a band at
        * the left edge, one inside, one at the bottom right corner */
       {
@@ -666,7 +684,7 @@ check_invariance (void)
       }
       name = g_strdup_printf ("%s_same_for_any_tiles_threads_regions", op + 9);
       report (name, dt == 0 && dth == 0 && dr == 0,
-              "max difference: tile sizes 32x32 to 700x16 %.2g, 1, 3 and 8 threads "
+              "max difference: tile sizes 32x32 to 700x16 and an origin at 37, -21 %.2g, 1, 3 and 8 threads "
               "(default %d) %.2g, regions %.2g", dt, threads, dth, dr);
       g_free (name);
       g_free (ref);

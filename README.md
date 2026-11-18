@@ -338,8 +338,9 @@ use the `gegl` program, `sudo apt install gegl`):
     meson setup build -Dmoduledir=$HOME/.local/share/gegl-0.4/plug-ins
     ninja -C build install
 
-GIMP loads the operations from `~/.local/share/gegl-0.4/plug-ins` at
-start. Needs GEGL 0.4.62 or later.
+That installs them into `~/.local/share/gegl-0.4/plug-ins/gegl-presence`
+(a folder of their own); GIMP loads the operations below
+`~/.local/share/gegl-0.4/plug-ins` at start. Needs GEGL 0.4.62 or later.
 
 ## Credits
 

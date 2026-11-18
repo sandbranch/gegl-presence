@@ -60,19 +60,19 @@ p () { echo "$((vx + $1)),$((vy + $2))"; }
 slider () { echo $(( 7 + ($1 - $2) * (vw - 55) / ($3 - $2) )); }
 
 
-FILTERS=426,49
-COLORS=321,49
+FILTERS=409,51
+COLORS=307,51
 # Filters > Enhance: its submenu opens on hover and Right
 enhance () {
-    $cdp "$view" click:$FILTERS wait:1000 move:450,175 move:460,176 wait:1500 key:Right \
+    $cdp "$view" click:$FILTERS wait:1000 move:450,187 move:460,188 wait:1500 key:Right \
       wait:1500 "$@" >/dev/null
 }
 # the three filters in Filters > Enhance (at its end, with only GIMP's own
 # plug-ins: tests/gui/start.sh), and Whites and Blacks in Colors
-CLARITY=689,425
-DEHAZE=693,450
-TEXTURE=692,475
-WB=389,753
+CLARITY=654,457
+DEHAZE=659,484
+TEXTURE=658,511
+WB=370,811
 
 open_dialog () {
     move_dialog || { fail "$1: no dialog"; return 1; }
@@ -105,32 +105,32 @@ session () {
         enhance click:$CLARITY wait:4000
         open_dialog clarity || return
         $cdp "$view" click:"$(p "$(slider 60 -100 100)" 115)" wait:1500 \
-          click:"$(p 268 224)" wait:8000 shot:"$docs/clarity.png" >/dev/null &&
+          click:"$(p 283 231)" wait:8000 shot:"$docs/clarity.png" >/dev/null &&
           pass "clarity: amount 60, split view";;
     texture)
         enhance click:$TEXTURE wait:4000
         open_dialog texture || return
         $cdp "$view" click:"$(p "$(slider -70 -100 100)" 115)" wait:1500 \
-          click:"$(p 268 224)" wait:8000 shot:"$docs/texture.png" >/dev/null &&
+          click:"$(p 283 231)" wait:8000 shot:"$docs/texture.png" >/dev/null &&
           pass "texture: amount about -70 (smoothing skin), split view";;
     dehaze)
         enhance click:$DEHAZE wait:4000
         open_dialog dehaze || return
         $cdp "$view" click:"$(p "$(slider 60 -100 100)" 115)" wait:1500 \
-          click:"$(p 269 219)" wait:8000 shot:"$docs/dehaze.png" >/dev/null &&
+          click:"$(p 283 228)" wait:8000 shot:"$docs/dehaze.png" >/dev/null &&
           pass "dehaze: amount 60, split view";;
     wb)
         $cdp "$view" click:$COLORS wait:1500 click:$WB wait:4000 >/dev/null
         open_dialog wb || return
         $cdp "$view" click:"$(p "$(slider 60 -100 100)" 115)" wait:1500 \
           click:"$(p "$(slider -50 -100 100)" 143)" wait:1500 \
-          click:"$(p $((vw - 101)) 250)" wait:6000 shot:"$docs/whites-blacks.png" >/dev/null &&
+          click:"$(p $((vw - 86)) 260)" wait:6000 shot:"$docs/whites-blacks.png" >/dev/null &&
           pass "wb: whites 60, blacks -50, split view";;
     nde)
         enhance click:$DEHAZE wait:4000
         open_dialog nde || return
         $cdp "$view" click:"$(p "$(slider 60 -100 100)" 115)" wait:3000 \
-          click:"$(p 319 254)" wait:6000 shot:"$gui_out/nde.png" >/dev/null
+          click:"$(p 319 265)" wait:6000 shot:"$gui_out/nde.png" >/dev/null
         touch "$gui_out/save"
         if wait_for "$gui_out/saved" 60; then
             pass "nde: the image saved with the filter"
@@ -151,7 +151,7 @@ done
 xcf=$gui_out/gui-nde.xcf
 if [ -f "$xcf" ]; then
     GIMP3_DIRECTORY="$out/gimp-profile"
-    GEGL_PATH="$out/gimp-check-modules:/app/lib/gegl-0.4"
+    GEGL_PATH="$out/gimp-check-modules:$gegl_sysdir"
     export GIMP3_DIRECTORY GEGL_PATH
     pass_env="GIMP3_DIRECTORY GEGL_PATH"
     run_prefix="--timeout=600" in_gimp gimp-console-3.2 --no-interface --no-data --no-fonts \

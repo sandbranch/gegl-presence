@@ -249,7 +249,7 @@ L* 90 to 95.1 and L* 97 to 99.5.
     tests/gimp-check.sh       # the filters in headless GIMP
     tests/gui/shots.sh        # the dialogs on Broadway, the screenshots
 
-Everything builds and runs inside the Flatpak GIMP's SDK
+Everything builds and runs against the native GIMP 3 and GEGL
 (../gimp-devtools/gimp-build.sh, with GIMP_RUN_HOME in tests/output) and
 every GIMP and GEGL run goes through tests/isolate.sh (a copy of
 gimp-devtools/isolate.sh), with the user's GIMP, Blender, Godot, Krita
@@ -290,7 +290,7 @@ thumb); the filters' thresholds (12 L*, 6 L*) make a 50 L* step an edge
 that the remapping leaves alone, and the overshoot that is left comes
 from the interpolation between samples and the pyramid.
 
-tests/gimp-check.sh (GIMP 3.2.6 Flatpak, headless): 86 checks. Each
+tests/gimp-check.sh (native GIMP 3.2.8, headless): 86 checks. Each
 filter as a `Gimp.DrawableFilter` on 8, 16 and 32 bit integer, half,
 float and double images and a grayscale one, saved as XCF and loaded again
 (settings kept), merged, against plain GEGL on the same pixels (at most
@@ -306,7 +306,8 @@ with its amount.
 ### Speed
 
 tests/bench.sh, 6000 x 4000 (24 megapixels, generated), best of three,
-on this machine (24 threads, GEGL 0.4.72 of the GIMP 3.2.6 Flatpak):
+on this machine (24 threads, GEGL 0.4.72; measured 2026-09 with the GEGL
+of the GIMP 3.2.6 Flatpak then in use):
 
 | Operation | 24 threads, float | 8 bit | 1 thread, float | 26 MP photo, 24 threads |
 |---|---|---|---|---|
@@ -330,16 +331,15 @@ slider takes about as long as above.
 
 ## Building and installing
 
+For the native GIMP 3 (on Debian and Ubuntu
+`sudo apt install gimp libgimp-3.0-dev meson ninja-build`; the tests also
+use the `gegl` program, `sudo apt install gegl`):
+
     meson setup build -Dmoduledir=$HOME/.local/share/gegl-0.4/plug-ins
     ninja -C build install
 
-For the Flatpak GIMP, build inside its SDK and install into its folder:
-
-    ../gimp-devtools/gimp-build.sh . meson setup build -Dmoduledir=\$GEGL_OPDIR
-    ../gimp-devtools/gimp-build.sh . ninja -C build install
-
-(`$GEGL_OPDIR` is `~/.var/app/org.gimp.GIMP/data/gegl-0.4/plug-ins`.)
-Needs GEGL 0.4.62 or later.
+GIMP loads the operations from `~/.local/share/gegl-0.4/plug-ins` at
+start. Needs GEGL 0.4.62 or later.
 
 ## Credits
 

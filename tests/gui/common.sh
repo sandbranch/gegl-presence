@@ -30,15 +30,9 @@ command -v node >/dev/null 2>&1 || { echo "SKIP  gui: no node"; exit 0; }
   { echo "FAIL  gui: run tests/gimp-check.sh first (it puts the modules in place)"; exit 1; }
 mkdir -p "$gui_out"
 
-# the Flatpak instance of our GIMP: the one whose sandbox runs our
-# gui-script.py
+# our GIMP: the process that runs our gui-script.py
 ours () {
-    flatpak ps --columns=instance,child-pid,application 2>/dev/null |
-      while read -r instance pid app; do
-          [ "$app" = org.gimp.GIMP ] || continue
-          { tr '\0' ' ' < "/proc/$pid/cmdline"; } 2>/dev/null |
-            grep -qF "$gui/gui-script.py" && echo "$instance"
-      done
+    pgrep -f -x "gimp-3.2 .*$gui/gui-script.py.*"
 }
 [ -z "$(ours)" ] || { echo "FAIL  gui: the test's GIMP is already running"; exit 1; }
 chrome_pid=
@@ -48,7 +42,8 @@ stop_all () {
     i=0
     while [ -n "$(ours)" ] && [ $i -lt 10 ]; do sleep 1; i=$((i + 1)); done
     for instance in $(ours); do
-        flatpak kill "$instance" 2>/dev/null
+        pkill -P "$instance" 2>/dev/null
+        kill "$instance" 2>/dev/null
     done
     [ -n "$gimp_pid" ] && wait "$gimp_pid" 2>/dev/null
     gimp_pid=

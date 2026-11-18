@@ -1,5 +1,5 @@
 #!/bin/sh
-# The operations as non-destructive filters in the Flatpak GIMP, without
+# The operations as non-destructive filters in the native GIMP, without
 # a window (tests/gimp-check.py): on RGB images of every precision and a
 # grayscale one, a layer with offsets, through an XCF save and load,
 # against plain GEGL; then GIMP's results against the gegl command line. Uses the modules from
@@ -32,17 +32,11 @@ status=0
 snapshot_begin gimp
 
 GIMP3_DIRECTORY="$out/gimp-profile"
-GEGL_PATH="$mod:/app/lib/gegl-0.4"
+GEGL_PATH="$mod:$gegl_sysdir"
 PRESENCE_CHECK_OUT="$check_out"
 export GIMP3_DIRECTORY GEGL_PATH PRESENCE_CHECK_OUT
 pass_env="GIMP3_DIRECTORY GEGL_PATH PRESENCE_CHECK_OUT"
-# the Flatpak's GIMP unless GIMP_FLATPAK=0 (as gimp-run.sh chooses)
-if [ "${GIMP_FLATPAK:-}" != 0 ] && command -v flatpak >/dev/null 2>&1 &&
-   flatpak info org.gimp.GIMP >/dev/null 2>&1; then
-    console=gimp-console-3.2
-else
-    console=$(command -v gimp-console-3.2 || command -v gimp-console)
-fi
+console=$(command -v gimp-console-3.2 || command -v gimp-console)
 
 run_prefix="--timeout=1800" in_gimp $console --no-interface --no-data --no-fonts \
   --batch-interpreter python-fu-eval \
@@ -62,6 +56,10 @@ for label, c in json.load(open(sys.argv[1])).items():
     print(label, c['op'], ' '.join(props))
 EOF
 rm -f "$out/gimp-check-cli.log"
+# the gegl program comes with GEGL, in its own package on Debian and
+# Ubuntu: without it these comparisons fail, they are not skipped
+command -v gegl >/dev/null 2>&1 ||
+  echo "FAIL  no gegl program for the command line comparisons (on Debian and Ubuntu: sudo apt install gegl)"
 while read -r label op props; do
     # shellcheck disable=SC2086
     # (the gegl program warns of one leaked GeglBuffer after any

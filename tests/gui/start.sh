@@ -1,5 +1,5 @@
 #!/bin/sh
-# Starts the Flatpak GIMP on a Broadway display, on the port
+# Starts the native GIMP on a Broadway display, on the port
 # PRESENCE_BROADWAY_PORT (8087 by default; the page is http://127.0.0.1:port/)
 # with tests/gui/gui-script.py (PRESENCE_GUI_PHOTO: the photo it opens), the
 # operations of tests/output/gimp-check-modules (tests/gimp-check.sh
@@ -29,16 +29,11 @@ mkdir -p "$gui_out" "$profile"
 # no Welcome dialog: GIMP shows it when the profile is of an older
 # version, or when asked to
 if ! grep -q config-version "$profile/gimprc" 2>/dev/null; then
-    version=$(LC_ALL=C flatpak info org.gimp.GIMP | sed -n 's/^ *Version: *//p')
+    version=$(gimp-console-3.2 --version | sed 's/.* //')
     printf '(config-version "%s")\n' "$version" >> "$profile/gimprc"
 fi
 grep -q show-welcome-dialog "$profile/gimprc" 2>/dev/null ||
   echo '(show-welcome-dialog no)' >> "$profile/gimprc"
-# only GIMP's own plug-ins, not the Flatpak's extensions: G'MIC-Qt
-# crashes at start on Broadway in this setup (a message box over the
-# screenshots), and the tests need none of them
-grep -q plug-in-path "$profile/gimprc" 2>/dev/null ||
-  echo '(plug-in-path "${gimp_dir}/plug-ins:${gimp_plug_in_dir}/plug-ins")' >> "$profile/gimprc"
 # the filter dialogs' options as GIMP starts them ("Merge filter" off):
 # GIMP keeps them between runs
 rm -f "$profile/tool-options/gimp-operation-tool"
@@ -75,13 +70,13 @@ cat > "$profile/sessionrc" <<SESSION
 (single-window-mode yes)
 (show-tabs yes)
 SESSION
-# broadwayd and GIMP in one shell inside the Flatpak (gimp_run of
-# tests/isolate.sh: the throwaway home, no GVFS)
+# broadwayd and GIMP in one shell (gimp_run of tests/isolate.sh: the
+# throwaway home, no GVFS)
 gimp_run --env=GDK_BACKEND=broadway --env=BROADWAY_DISPLAY=:$display \
   --env=GIMP3_DIRECTORY="$profile" --env=PRESENCE_GUI_OUT="$gui_out" \
-  --env=GEGL_PATH="$out/gimp-check-modules:/app/lib/gegl-0.4" \
+  --env=GEGL_PATH="$out/gimp-check-modules:$gegl_sysdir" \
   --env=PRESENCE_GUI_PHOTO="${PRESENCE_GUI_PHOTO:-}" --env=PRESENCE_GUI_NAME="${PRESENCE_GUI_NAME:-gui}" \
-  --filesystem="$top" -- sh -c \
+  -- sh -c \
   "broadwayd --port $port :$display & bw=\$!; trap 'kill \$bw' EXIT; \
    i=0; while [ ! -f '$gui_out/page-open' ] && [ \$i -lt 300 ]; do sleep 0.2; i=\$((i+1)); done; \
    gimp-3.2 --new-instance --no-splash --no-fonts \

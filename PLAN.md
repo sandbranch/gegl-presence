@@ -5,7 +5,7 @@
 `presence:clarity`, `presence:texture`, `presence:dehaze` and
 `presence:whites-blacks` (README). Tested with tests/check.sh (114 checks
 with the photos, 108 also under ASan and UBSan), tests/gimp-check.sh
-(GIMP 3.2.6 Flatpak: every precision, grayscale, a layer with offsets,
+(native GIMP 3.2.8: every precision, grayscale, a layer with offsets,
 XCF, the command line), tests/gui/shots.sh (the menus and dialogs on
 Broadway, looked at; Dehaze applied with OK and live in the saved XCF),
 tests/bench.sh (24 and 26 megapixels). Patents in docs/patents.md.
@@ -49,14 +49,16 @@ tests/bench.sh (24 and 26 megapixels). Patents in docs/patents.md.
 
 ## Found along the way (to report upstream)
 
-- The `gegl` program (GEGL 0.4.72 in the GIMP 3.2.6 Flatpak) warns
-  "1 GeglBuffers leaked" after any operation that caches its whole
-  result through `get_cached_region`, GEGL's own `gegl:stretch-contrast`
-  too; in a program of one's own (tests/check.c) nothing leaks.
-- GIMP 3.2.6 Flatpak on Broadway: G'MIC-Qt (the org.gimp.GIMP.Plugin.GMic
-  extension) crashes at start in the isolated test profile ("Plug-in
-  crashed: gmic_gimp_qt"); the GUI tests load only GIMP's own plug-ins.
-  Not investigated further.
+- 2026-09: the `gegl` program (GEGL 0.4.72 in the GIMP 3.2.6 Flatpak)
+  warned "1 GeglBuffers leaked" after any operation that caches its
+  whole result through `get_cached_region`, GEGL's own
+  `gegl:stretch-contrast` too; in a program of one's own (tests/check.c)
+  nothing leaks. The `gegl` 0.4.72 of Ubuntu does not warn
+  (tests/gimp-check.sh, 2026-11-18).
+- 2026-09, GIMP 3.2.6 Flatpak on Broadway: G'MIC-Qt (the
+  org.gimp.GIMP.Plugin.GMic extension) crashed at start in the isolated
+  test profile ("Plug-in crashed: gmic_gimp_qt"). Not investigated
+  further; the tests now use the native GIMP, without G'MIC.
 - GIMP keeps the filter dialogs' "Merge filter" choice between runs in
   `tool-options/gimp-operation-tool`; a test that clicks it once gets
   merged (destructive) filters from then on. tests/gui/start.sh removes

@@ -1,10 +1,9 @@
 #!/bin/sh
 # Builds the operations and the checks of tests/check.c twice, as usual
 # and with AddressSanitizer and UndefinedBehaviorSanitizer, and runs the
-# checks with both. With the Flatpak GIMP everything builds and runs
-# inside its SDK (gimp-devtools/gimp-build.sh, found next to this
-# repository or at $GIMP_BUILD); with GIMP_FLATPAK=0 it uses the system
-# GEGL. Needs no network or display. Lists the user's GIMP folders
+# checks with both, against the native GEGL (gimp-devtools/gimp-build.sh,
+# found next to this repository or at $GIMP_BUILD). Needs no network or
+# display. Lists the user's GIMP folders
 # before and after (gimp-devtools/snapshot.sh) and fails if anything changed.
 #
 #   tests/check.sh           both builds

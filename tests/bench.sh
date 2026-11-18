@@ -1,8 +1,7 @@
 #!/bin/sh
 # How long the operations take on a 24 megapixel image (tests/bench.c),
 # with the build of tests/check.sh (tests/output/build-check, or
-# $BUILD), inside the Flatpak GIMP with a throwaway home, or natively
-# with GIMP_FLATPAK=0. Lists the user's GIMP folders before and after and
+# $BUILD), natively with a throwaway home. Lists the user's GIMP folders before and after and
 # fails if anything changed.
 #   tests/bench.sh                 6000 x 4000
 #   tests/bench.sh 3000 2000       another size

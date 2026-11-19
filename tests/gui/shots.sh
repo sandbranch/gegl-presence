@@ -43,15 +43,29 @@ dialog_rect () {
 # moves the dialog to the top right corner of the page; sets vx, vy (its
 # visible top left corner) and vw (its visible width)
 move_dialog () {
-    r=$(dialog_rect)
-    [ -n "$r" ] || return 1
-    l=${r%%,*}; r=${r#*,}; t=${r%%,*}; r=${r#*,}; w=${r%%,*}
-    vw=$((w - 52))
-    vx=$((1278 - vw))
-    vy=120
-    gx=$((l + w / 2)); gy=$((t + 36))
-    $cdp "$view" down:$gx,$gy move:$(( (gx + vx + vw / 2) / 2 )),$(( (gy + vy + 10) / 2 )) \
-      move:$((vx + vw / 2)),$((vy + 10)) up:$((vx + vw / 2 + 1)),$((vy + 10)) wait:1200 >/dev/null
+    tries=0
+    while :; do
+        r=$(dialog_rect)
+        [ -n "$r" ] || return 1
+        l=${r%%,*}; r=${r#*,}; t=${r%%,*}; r=${r#*,}; w=${r%%,*}
+        vw=$((w - 52))
+        tx=$((1278 - vw)); ty=120
+        # there (within a few pixels): done
+        if [ $((l + 26 - tx)) -ge -8 ] && [ $((l + 26 - tx)) -le 8 ] &&
+           [ $((t + 26 - ty)) -ge -8 ] && [ $((t + 26 - ty)) -le 8 ]; then
+            break
+        fi
+        # GIMP 3.2.8 may open the dialog half off the page, and a drag on
+        # Broadway does not always take: check where it went, try again
+        # (as gegl-control-points)
+        tries=$((tries + 1))
+        [ $tries -le 3 ] || return 1
+        gx=$((l + w / 2)); gy=$((t + 36))
+        $cdp "$view" move:$gx,$gy wait:300 down:$gx,$gy wait:300 \
+          move:$(( (gx + tx + vw / 2) / 2 )),$(( (gy + ty + 10) / 2 )) wait:200 \
+          move:$((tx + vw / 2)),$((ty + 10)) wait:200 up:$((tx + vw / 2 + 1)),$((ty + 10)) wait:1200 >/dev/null
+    done
+    vx=$((l + 26)); vy=$((t + 26))
 }
 # a point in the dialog, from its visible top left corner
 p () { echo "$((vx + $1)),$((vy + $2))"; }
@@ -75,7 +89,7 @@ TEXTURE=692,475
 WB=389,753
 
 open_dialog () {
-    move_dialog || { fail "$1: no dialog"; return 1; }
+    move_dialog || { fail "$1: no dialog, or it would not move into place"; return 1; }
     pass "$1: the dialog opened"
 }
 
